@@ -200,8 +200,12 @@ where
 extern crate embedded_graphics;
 #[cfg(feature = "graphics")]
 use self::embedded_graphics::{
-    drawable::{Dimensions, Pixel},
-    pixelcolor::Rgb565,
+    drawable::Pixel,
+    geometry::Dimensions,
+    pixelcolor::{
+        raw::{RawData, RawU16},
+        Rgb565,
+    },
     Drawing, SizedDrawing,
 };
 
@@ -217,8 +221,12 @@ where
         T: IntoIterator<Item = Pixel<Rgb565>>,
     {
         for Pixel(coord, color) in item_pixels {
-            self.set_pixel(coord.0 as u16, coord.1 as u16, color.0)
-                .expect("pixel write failed");
+            self.set_pixel(
+                coord.x as u16,
+                coord.y as u16,
+                RawU16::from(color).into_inner(),
+            )
+            .expect("pixel write failed");
         }
     }
 }
@@ -239,11 +247,13 @@ where
         let bottom_right = item_pixels.bottom_right();
 
         self.set_pixels(
-            top_left.0 as u16,
-            top_left.1 as u16,
-            bottom_right.0 as u16,
-            bottom_right.1 as u16,
-            item_pixels.into_iter().map(|Pixel(_coord, color)| color.0),
+            top_left.x as u16,
+            top_left.y as u16,
+            bottom_right.x as u16,
+            bottom_right.y as u16,
+            item_pixels
+                .into_iter()
+                .map(|Pixel(_coord, color)| RawU16::from(color).into_inner()),
         )
         .expect("pixels write failed")
     }
