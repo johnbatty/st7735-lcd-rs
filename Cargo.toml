@@ -23,7 +23,7 @@ default-features = false
 
 [dependencies.embedded-graphics]
 optional = true
-version = "0.6.0-alpha.2"
+version = "0.6.0-alpha.3"
 
 [dev-dependencies]
 metro_m4 = "0.1"
@@ -32,6 +32,3 @@ panic-halt = "0.2"
 [features]
 default = ["graphics"]
 graphics = ["embedded-graphics"]
-
-[patch.crates-io]
-embedded-graphics = {version = "0.6.0-alpha.2", git = "https://github.com/jamwaffles/embedded-graphics.git", rev="e145a1b" }

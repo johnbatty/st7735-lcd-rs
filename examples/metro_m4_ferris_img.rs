@@ -7,10 +7,10 @@
 extern crate metro_m4 as hal;
 extern crate panic_halt;
 
-use embedded_graphics::egrectangle;
 use embedded_graphics::image::Image;
 use embedded_graphics::pixelcolor::{raw::LittleEndian, Rgb565, RgbColor};
 use embedded_graphics::prelude::*;
+use embedded_graphics::{egrectangle, primitive_style};
 
 use hal::clock::GenericClockController;
 use hal::prelude::*;
@@ -48,24 +48,24 @@ fn main() -> ! {
     let rst = pins.d1.into_push_pull_output(&mut pins.port);
     let mut delay = hal::delay::Delay::new(core.SYST, &mut clocks);
 
-    let mut disp = st7735_lcd::ST7735::new(spi, dc, rst, false, true);
+    let mut disp = st7735_lcd::ST7735::new(spi, dc, rst, false, true, 160, 128);
     disp.init(&mut delay).unwrap();
     disp.set_orientation(&Orientation::Landscape).unwrap();
     // My particular lcd seems to be off a few pixels
     disp.set_offset(1, 25);
 
     //black backdrop
-    disp.draw(egrectangle!(
-        (0, 0),
-        (160, 128),
-        stroke = None,
-        fill = Some(RgbColor::BLACK)
-    ));
+    egrectangle!(
+        top_left = (0, 0),
+        bottom_right = (160, 128),
+        style = primitive_style!(stroke_width = 0, fill_color = RgbColor::BLACK)
+    )
+    .draw(&mut disp);
 
     let ferris: Image<Rgb565, LittleEndian> =
         Image::new(include_bytes!("./ferris.raw"), 86, 64).translate(Point::new(40, 33));
 
-    disp.draw(ferris.into_iter());
+    ferris.draw(&mut disp);
 
     loop {}
 }
