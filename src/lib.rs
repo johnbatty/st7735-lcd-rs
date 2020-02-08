@@ -5,6 +5,7 @@
 pub mod instruction;
 
 use core::mem::transmute;
+use core::iter;
 
 use crate::instruction::Instruction;
 use num_derive::ToPrimitive;
@@ -206,6 +207,20 @@ where
         self.set_address_window(sx, sy, ex, ey)?;
         self.write_pixels(colors)
     }
+
+    /// Sets pixel colors at the given drawing window
+    pub fn set_color(
+        &mut self,
+        sx: u16,
+        sy: u16,
+        ex: u16,
+        ey: u16,
+        color: Rgb565,
+    ) -> Result<(), ()> {
+        self.set_address_window(sx, sy, ex, ey)?;
+        let pixel_count = (ex - sx + 1) * (ey - sy + 1);
+        self.write_pixels(iter::repeat(RawU16::from(color).into_inner()).take(pixel_count as usize))
+    }
 }
 
 #[cfg(feature = "graphics")]
@@ -236,5 +251,10 @@ where
 
     fn size(&self) -> Size {
         Size::new(self.width, self.height)
+    }
+
+    fn clear(&mut self, color: Rgb565)
+    {
+        self.set_color(0, 0, self.width as u16 - 1, self.height as u16 - 1, color).unwrap();
     }
 }
